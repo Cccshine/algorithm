@@ -1,4 +1,4 @@
-import { List, Node } from "./type";
+import { List, LoopList, Node } from "./type";
 // 不带头单链表
 class SingleLinkList<T> implements List<T> {
   head: SingleNode<T> | null;
@@ -122,8 +122,12 @@ class SingleLinkList<T> implements List<T> {
 // 带头单链表
 class SingleLinkList1<T> implements List<T> {
   readonly head: SingleNode<T>;
-  constructor() {
+  private limit?: number;
+  private current: number;
+  constructor(limit?: number) {
     this.head = new SingleNode<any>(null);
+    this.limit = limit;
+    this.current = 0;
   }
   insertToHead(value: T): void {
     let newNode = new SingleNode(value);
@@ -169,6 +173,15 @@ class SingleLinkList1<T> implements List<T> {
     }
     return p;
   }
+  // 根据value查找前一个结点
+  findPreByValue(value: T): SingleNode<T> | null {
+    // 因为是带头单链表，所以index的起始是头结点的下一个
+    let p = this.head;
+    while (p.next !== null && p.next.value !== value) {
+      p = p.next;
+    }
+    return p;
+  }
   removeByIndex(index: number): Boolean {
     let p = this.head.next;
     if (!p) {
@@ -196,6 +209,49 @@ class SingleLinkList1<T> implements List<T> {
     p.next = p.next.next;
     return true;
   }
+  // LRU---放里面实现一次
+  put(value: T): void {
+    let { limit, current } = this;
+    if (current === 0) {
+      //没有缓存时
+      let newNode = new SingleNode<T>(value);
+      newNode.next = this.head.next;
+      this.head.next = newNode;
+      this.current++;
+    } else {
+      //又缓存
+      let p = this.head;
+      let preNode: SingleNode<T> | null = null; // 若查到缓存，则为缓存的前一个结点
+      let tail2Node: SingleNode<T> | null = null; // 倒数第二个结点
+      // 遍历查找缓存是否已存在
+      while (p.next !== null && p.next.value !== value) {
+        if (p.next.next === null) {
+          tail2Node = p;
+        }
+        p = p.next;
+        preNode = p;
+      }
+      if (p.next) {
+        //如果查到缓存，则把该结点挪到头部
+        let findNode = p.next;
+        preNode!.next = findNode.next;
+        findNode.next = this.head.next;
+        this.head.next = findNode;
+      } else {
+        //如果没查到
+        let newNode = new SingleNode<T>(value);
+        // 缓存已满，删掉尾结点
+        if (current >= limit!) {
+          tail2Node!.next = null;
+        } else {
+          this.current++;
+        }
+        // 在头部插入新结点
+        newNode.next = this.head.next;
+        this.head.next = newNode;
+      }
+    }
+  }
   toString(): string {
     let p = this.head;
     let ret: string = "";
@@ -212,6 +268,15 @@ class SingleNode<T> implements Node<T> {
   value: T;
   next: SingleNode<T> | null;
   constructor(value: T, next: SingleNode<T> | null = null) {
+    this.value = value;
+    this.next = next;
+  }
+}
+// 循环单链表节点
+class SingleLoopNode<T> implements Node<T> {
+  value: T;
+  next: SingleLoopNode<T>;
+  constructor(value: T, next: SingleLoopNode<T>) {
     this.value = value;
     this.next = next;
   }
@@ -243,12 +308,12 @@ class SingleNode<T> implements Node<T> {
 // console.log(findd);
 // console.log(find3);
 
-let sl2 = new SingleLinkList1<string>();
-sl2.insertToTail("a");
-sl2.insertToTail("f");
-sl2.insertToTail("k");
-sl2.insertToTail("f");
-sl2.insertToTail("a");
+// let sl2 = new SingleLinkList1<string>();
+// sl2.insertToTail("a");
+// sl2.insertToTail("f");
+// sl2.insertToTail("k");
+// sl2.insertToTail("f");
+// sl2.insertToTail("a");
 // sl2.insertToHead("a");
 // sl2.insertToHead("b");
 // sl2.insertToHead("c");
@@ -261,10 +326,13 @@ sl2.insertToTail("a");
 // let find2 = sl2.findByIndex(2);
 // let find3 = sl2.findByIndex(3);
 // let find4 = sl2.findByIndex(5);
+// let find1 = sl2.findPreByValue("d");
+// find1!.next = find1!.next!.next;
+// console.log(find1);
 // sl2.insertToIndex("aa", 0);
 // console.log(sl2.removeByIndex(2));
 // console.log(sl2.removeByValue("a"));
-console.log(sl2.toString());
+// console.log(sl2.toString());
 // console.log(find1);
 // console.log(find2);
 // console.log(find3);
@@ -329,4 +397,184 @@ function isPalindrome1<T>(sl: SingleLinkList1<T>): Boolean {
   return true;
 }
 
-console.log(isPalindrome1(sl2));
+// console.log(isPalindrome1(sl2));
+
+class LRUCache<T> {
+  private limit: number;
+  private current: number;
+  private cacheList: SingleLinkList1<T>;
+  constructor(limit: number) {
+    this.limit = limit;
+    this.current = 0;
+    this.cacheList = new SingleLinkList1<T>();
+  }
+  put(value: T): void {
+    let { current, cacheList, limit } = this;
+    if (current === 0) {
+      cacheList.insertToHead(value);
+      this.current++;
+    } else {
+      let node = cacheList.findPreByValue(value);
+      if (node && node.next) {
+        node.next = node.next.next;
+        // cacheList.removeByValue(value);
+        cacheList.insertToHead(value);
+      } else {
+        if (current >= limit) {
+          cacheList.removeByIndex(current - 1);
+          // node
+          cacheList.insertToHead(value);
+        } else {
+          cacheList.insertToHead(value);
+          this.current++;
+        }
+      }
+    }
+  }
+  toString() {
+    return this.cacheList.toString();
+  }
+}
+
+// const lru = new LRUCache<string>(5);
+// const lru = new SingleLinkList1<string>(5);
+// lru.put("1");
+// lru.put("2");
+// lru.put("3");
+// lru.put("4");
+// lru.put("5");
+// lru.put("6");
+// lru.put("4");
+// lru.put("2");
+// // lru.put("6");
+// // lru.put("8");
+// // lru.put("2");
+// console.log(lru.toString());
+
+// 带头循环单链表
+class SingleLinkList2<T> implements LoopList<T> {
+  readonly head: SingleLoopNode<T>;
+  constructor() {
+    this.head = new SingleLoopNode<any>(null, this.head);
+    this.head.next = this.head;
+  }
+  insertToHead(value: T): void {
+    let newNode = new SingleLoopNode(value, this.head.next);
+    this.head.next = newNode;
+  }
+  insertToTail(value: T): void {
+    let newNode = new SingleLoopNode(value, this.head);
+    let p = this.head;
+    while (p.next !== this.head) {
+      p = p.next;
+    }
+    p.next = newNode;
+  }
+  insertToIndex(value: T, index: number): void {
+    if (index === 0) {
+      this.insertToHead(value);
+      return;
+    }
+    let findNode = this.findByIndex(index - 1);
+    if (!findNode) {
+      return;
+    }
+    let newNode = new SingleLoopNode(value, findNode.next);
+    findNode.next = newNode;
+  }
+  findByIndex(index: number): SingleLoopNode<T> | null {
+    let count = 0;
+    // 因为是带头单链表，所以index的起始是头结点的下一个
+    let p = this.head.next;
+    while (p !== this.head && count !== index) {
+      p = p.next;
+      count++;
+    }
+    return p === this.head ? null : p;
+  }
+  findByValue(value: T): SingleLoopNode<T> | null {
+    // 因为是带头单链表，所以index的起始是头结点的下一个
+    let p = this.head.next;
+    while (p !== this.head && p.value !== value) {
+      p = p.next;
+    }
+    return p === this.head ? null : p;
+  }
+  // 根据value查找前一个结点
+  findPreByValue(value: T): SingleLoopNode<T> | null {
+    // 因为是带头单链表，所以index的起始是头结点的下一个
+    let p = this.head;
+    while (p.next !== this.head && p.next.value !== value) {
+      p = p.next;
+    }
+    return p === this.head ? null : p;
+  }
+  removeByIndex(index: number): Boolean {
+    let p = this.head.next;
+    if (!p) {
+      return false;
+    }
+    if (index === 0) {
+      this.head.next = p.next;
+      return true;
+    }
+    let findNode = this.findByIndex(index - 1);
+    if (!findNode || findNode.next === this.head) {
+      return false;
+    }
+    findNode.next = findNode.next.next;
+    return true;
+  }
+  removeByValue(value: T): Boolean {
+    let p = this.head;
+    while (p.next !== this.head && p.next.value !== value) {
+      p = p.next;
+    }
+    if (p.next === this.head) {
+      return false;
+    }
+    p.next = p.next.next;
+    return true;
+  }
+  toString(): string {
+    let p = this.head;
+    let ret: string = "";
+    while (p.next !== this.head) {
+      p = p.next;
+      ret = `${ret} ${p.value}`;
+    }
+    return ret;
+  }
+}
+
+let sl3 = new SingleLinkList2<string>();
+// sl3.insertToTail("a");
+// sl3.insertToTail("f");
+// sl3.insertToTail("k");
+// sl3.insertToTail("f");
+// sl3.insertToTail("a");
+sl3.insertToHead("a");
+sl3.insertToHead("b");
+sl3.insertToHead("c");
+sl3.insertToHead("d");
+// let find1 = sl3.findByValue("a");
+// console.log(find1!.next);
+// let find2 = sl3.findByValue("c");
+// let find3 = sl3.findByValue("d");
+// let find4 = sl3.findByValue("bb");
+let find1 = sl3.findByIndex(0);
+let find2 = sl3.findByIndex(2);
+let find3 = sl3.findByIndex(3);
+let find4 = sl3.findByIndex(5);
+// let find1 = sl3.findPreByValue("d");
+// find1!.next = find1!.next!.next;
+// console.log(find1);
+// sl3.insertToIndex("aa", 3);
+// console.log(sl3.removeByIndex(2));
+// console.log(sl3.removeByValue("a"));
+// console.log(sl3);
+console.log(sl3.toString());
+console.log(find1);
+console.log(find2);
+console.log(find3);
+console.log(find4);
