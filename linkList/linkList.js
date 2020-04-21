@@ -440,7 +440,7 @@ var LRUCache = /** @class */ (function () {
 // 带头循环单链表
 var SingleLinkList2 = /** @class */ (function () {
     function SingleLinkList2() {
-        this.head = new SingleLoopNode(null, this.head);
+                this.head = new SingleLoopNode(null, this.head    );
         this.head.next = this.head;
     }
     SingleLinkList2.prototype.insertToHead = function (value) {
