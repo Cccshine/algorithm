@@ -261,6 +261,18 @@ class SingleLinkList1<T> implements List<T> {
     }
     return ret;
   }
+  reserve(): void {
+    let p = this.head.next;
+    let pre = this.head;
+    while (p !== null) {
+      const next = p.next;
+      p.next = pre;
+      pre = p;
+      p = next;
+    }
+    if (this.head.next) this.head.next.next = null;
+    this.head.next = pre;
+  }
 }
 
 // 单链表节点
@@ -308,12 +320,15 @@ class SingleLoopNode<T> implements Node<T> {
 // console.log(findd);
 // console.log(find3);
 
-// let sl2 = new SingleLinkList1<string>();
-// sl2.insertToTail("a");
-// sl2.insertToTail("f");
-// sl2.insertToTail("k");
-// sl2.insertToTail("f");
-// sl2.insertToTail("a");
+let sl2 = new SingleLinkList1<string>();
+sl2.insertToTail("a");
+sl2.insertToTail("b");
+sl2.insertToTail("c");
+sl2.insertToTail("d");
+sl2.insertToTail("e");
+console.log(sl2.toString());
+sl2.reserve();
+console.log(sl2.toString());
 // sl2.insertToHead("a");
 // sl2.insertToHead("b");
 // sl2.insertToHead("c");
@@ -547,25 +562,25 @@ class SingleLinkList2<T> implements LoopList<T> {
   }
 }
 
-let sl3 = new SingleLinkList2<string>();
+// let sl3 = new SingleLinkList2<string>();
 // sl3.insertToTail("a");
 // sl3.insertToTail("f");
 // sl3.insertToTail("k");
 // sl3.insertToTail("f");
 // sl3.insertToTail("a");
-sl3.insertToHead("a");
-sl3.insertToHead("b");
-sl3.insertToHead("c");
-sl3.insertToHead("d");
+// sl3.insertToHead("a");
+// sl3.insertToHead("b");
+// sl3.insertToHead("c");
+// sl3.insertToHead("d");
 // let find1 = sl3.findByValue("a");
 // console.log(find1!.next);
 // let find2 = sl3.findByValue("c");
 // let find3 = sl3.findByValue("d");
 // let find4 = sl3.findByValue("bb");
-let find1 = sl3.findByIndex(0);
-let find2 = sl3.findByIndex(2);
-let find3 = sl3.findByIndex(3);
-let find4 = sl3.findByIndex(5);
+// let find1 = sl3.findByIndex(0);
+// let find2 = sl3.findByIndex(2);
+// let find3 = sl3.findByIndex(3);
+// let find4 = sl3.findByIndex(5);
 // let find1 = sl3.findPreByValue("d");
 // find1!.next = find1!.next!.next;
 // console.log(find1);
@@ -573,8 +588,8 @@ let find4 = sl3.findByIndex(5);
 // console.log(sl3.removeByIndex(2));
 // console.log(sl3.removeByValue("a"));
 // console.log(sl3);
-console.log(sl3.toString());
-console.log(find1);
-console.log(find2);
-console.log(find3);
-console.log(find4);
+// console.log(sl3.toString());
+// console.log(find1);
+// console.log(find2);
+// console.log(find3);
+// console.log(find4);

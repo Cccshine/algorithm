@@ -255,6 +255,19 @@ var SingleLinkList1 = /** @class */ (function () {
         }
         return ret;
     };
+    SingleLinkList1.prototype.reserve = function () {
+        var p = this.head.next;
+        var pre = this.head;
+        while (p !== null) {
+            var next = p.next;
+            p.next = pre;
+            pre = p;
+            p = next;
+        }
+        if (this.head.next)
+            this.head.next.next = null;
+        this.head.next = pre;
+    };
     return SingleLinkList1;
 }());
 // 单链表节点
@@ -299,12 +312,15 @@ var SingleLoopNode = /** @class */ (function () {
 // // console.log(find0);
 // console.log(findd);
 // console.log(find3);
-// let sl2 = new SingleLinkList1<string>();
-// sl2.insertToTail("a");
-// sl2.insertToTail("f");
-// sl2.insertToTail("k");
-// sl2.insertToTail("f");
-// sl2.insertToTail("a");
+var sl2 = new SingleLinkList1();
+sl2.insertToTail("a");
+sl2.insertToTail("b");
+sl2.insertToTail("c");
+sl2.insertToTail("d");
+sl2.insertToTail("e");
+console.log(sl2.toString());
+sl2.reserve();
+console.log(sl2.toString());
 // sl2.insertToHead("a");
 // sl2.insertToHead("b");
 // sl2.insertToHead("c");
@@ -440,7 +456,7 @@ var LRUCache = /** @class */ (function () {
 // 带头循环单链表
 var SingleLinkList2 = /** @class */ (function () {
     function SingleLinkList2() {
-                this.head = new SingleLoopNode(null, this.head    );
+        this.head = new SingleLoopNode(null, this.head);
         this.head.next = this.head;
     }
     SingleLinkList2.prototype.insertToHead = function (value) {
@@ -532,25 +548,25 @@ var SingleLinkList2 = /** @class */ (function () {
     };
     return SingleLinkList2;
 }());
-var sl3 = new SingleLinkList2();
+// let sl3 = new SingleLinkList2<string>();
 // sl3.insertToTail("a");
 // sl3.insertToTail("f");
 // sl3.insertToTail("k");
 // sl3.insertToTail("f");
 // sl3.insertToTail("a");
-sl3.insertToHead("a");
-sl3.insertToHead("b");
-sl3.insertToHead("c");
-sl3.insertToHead("d");
+// sl3.insertToHead("a");
+// sl3.insertToHead("b");
+// sl3.insertToHead("c");
+// sl3.insertToHead("d");
 // let find1 = sl3.findByValue("a");
 // console.log(find1!.next);
 // let find2 = sl3.findByValue("c");
 // let find3 = sl3.findByValue("d");
 // let find4 = sl3.findByValue("bb");
-var find1 = sl3.findByIndex(0);
-var find2 = sl3.findByIndex(2);
-var find3 = sl3.findByIndex(3);
-var find4 = sl3.findByIndex(5);
+// let find1 = sl3.findByIndex(0);
+// let find2 = sl3.findByIndex(2);
+// let find3 = sl3.findByIndex(3);
+// let find4 = sl3.findByIndex(5);
 // let find1 = sl3.findPreByValue("d");
 // find1!.next = find1!.next!.next;
 // console.log(find1);
@@ -558,8 +574,8 @@ var find4 = sl3.findByIndex(5);
 // console.log(sl3.removeByIndex(2));
 // console.log(sl3.removeByValue("a"));
 // console.log(sl3);
-console.log(sl3.toString());
-console.log(find1);
-console.log(find2);
-console.log(find3);
-console.log(find4);
+// console.log(sl3.toString());
+// console.log(find1);
+// console.log(find2);
+// console.log(find3);
+// console.log(find4);
