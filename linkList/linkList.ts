@@ -320,15 +320,15 @@ class SingleLoopNode<T> implements Node<T> {
 // console.log(findd);
 // console.log(find3);
 
-let sl2 = new SingleLinkList1<string>();
-sl2.insertToTail("a");
-sl2.insertToTail("b");
-sl2.insertToTail("c");
-sl2.insertToTail("d");
-sl2.insertToTail("e");
-console.log(sl2.toString());
-sl2.reserve();
-console.log(sl2.toString());
+// let sl2 = new SingleLinkList1<string>();
+// sl2.insertToTail("a");
+// sl2.insertToTail("b");
+// sl2.insertToTail("c");
+// sl2.insertToTail("d");
+// sl2.insertToTail("e");
+// console.log(sl2.toString());
+// sl2.reserve();
+// console.log(sl2.toString());
 // sl2.insertToHead("a");
 // sl2.insertToHead("b");
 // sl2.insertToHead("c");
@@ -593,3 +593,189 @@ class SingleLinkList2<T> implements LoopList<T> {
 // console.log(find2);
 // console.log(find3);
 // console.log(find4);
+
+function toString<T>(list: SingleNode<T> | null): string {
+  let p = list;
+  let ret: string = "";
+  while (p !== null) {
+    ret = `${ret} ${p.value}`;
+    p = p.next;
+  }
+  return ret;
+}
+
+function reverse<T>(list: SingleNode<T>): SingleNode<T> | null {
+  let currentNode: SingleNode<T> | null = list;
+  let preNode: SingleNode<T> | null = null;
+  while (currentNode !== null) {
+    let node = currentNode.next;
+    currentNode.next = preNode;
+    preNode = currentNode;
+    currentNode = node;
+  }
+  return preNode;
+}
+
+// 如果有环，fast一定会先进入环，而slow后进入环。当两个指针都进入环之后，经过一定步的操作之后
+// 二者一定能够在环上相遇，并且此时slow还没有绕环一圈，也就是说一定是在slow走完第一圈之前相遇
+function hasRing<T>(list: SingleNode<T>): Boolean {
+  let currentNode: SingleNode<T> | null = list;
+  let slow: SingleNode<T> | null = currentNode;
+  let fast: SingleNode<T> | null = currentNode;
+  while (fast !== null && fast.next !== null) {
+    slow = slow!.next;
+    fast = fast.next.next;
+    if (slow === fast) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function getCenterNode<T>(list: SingleNode<T>): SingleNode<T> | null {
+  let currentNode: SingleNode<T> = list;
+  let slow: SingleNode<T> | null = currentNode;
+  let fast: SingleNode<T> | null = currentNode;
+  while (fast !== null && fast.next !== null) {
+    slow = slow!.next;
+    fast = fast.next.next;
+    if (slow === fast) {
+      break;
+    }
+  }
+  // 没环
+  if (!fast || !fast.next) {
+    return slow;
+  }
+  let ringLen = 0;
+  // 有环，求环长
+  while (fast !== slow || ringLen === 0) {
+    fast = fast!.next!.next;
+    slow = slow!.next;
+    ringLen++;
+  }
+  console.log("ringLen", ringLen);
+  // 有环，求入环点，fast从head开始，slow继续往前，再次相遇的点即为入环点
+  let listLen = ringLen;
+  fast = currentNode;
+  while (fast !== slow) {
+    fast = fast!.next;
+    slow = slow!.next;
+    listLen++;
+  }
+  console.log("入环点", fast);
+  console.log("listLen", listLen);
+  // 获取中点
+  let centerLen = Math.floor(listLen / 2);
+  let len = 0;
+  fast = currentNode;
+  while (len < centerLen) {
+    fast = fast!.next;
+    len++;
+  }
+  console.log("centerLen", centerLen);
+  return fast;
+}
+
+function removeByReverseIndex<T>(list: SingleNode<T>, index: number) {
+  if (hasRing(list)) {
+    return;
+  }
+  // let reserveList = reverse(list);
+  // let currentNode = reserveList!;
+  // let count = 0;
+  // while(currentNode.next !== null && count !== index - 1){
+  //   currentNode = currentNode.next;
+  //   count++;
+  // }
+  // console.log(currentNode)
+  // if(!currentNode.next){
+  //   return
+  // }else{
+  //   currentNode.next = currentNode.next.next;
+  // }
+  // reverse(reserveList!);
+
+  let currentNode: SingleNode<T> | null = list;
+  let len = 0;
+  while (currentNode !== null) {
+    currentNode = currentNode.next;
+    len++;
+  }
+  let count = 0;
+  let startIndex = len - index - 1 - 1;
+  currentNode = list;
+  while (currentNode.next !== null && count !== startIndex) {
+    currentNode = currentNode.next;
+    count++;
+  }
+  if (!currentNode.next) {
+    return;
+  } else {
+    currentNode.next = currentNode.next.next;
+  }
+}
+
+function mergeSortedList<T>(
+  lista: SingleNode<T>,
+  listb: SingleNode<T>
+): SingleNode<T> {
+  let p: SingleNode<T> | null = lista;
+  let q: SingleNode<T> | null = listb;
+  let mergeList: SingleNode<T> | null = null;
+
+  if (p.value < q.value) {
+    mergeList = p;
+    p = p.next;
+  } else {
+    mergeList = q;
+    q = q.next;
+  }
+  let currentNode = mergeList;
+  // 遍历完一个链表即可
+  while (p !== null && q !== null) {
+    if (p.value < q.value) {
+      currentNode.next = p;
+      p = p.next;
+    } else {
+      currentNode.next = q;
+      q = q.next;
+    }
+    currentNode = currentNode.next;
+  }
+  // 剩下的直接放后面即可
+  if (p) {
+    currentNode.next = p;
+  } else {
+    currentNode.next = q;
+  }
+  return mergeList;
+}
+
+// const node1 = new SingleNode(1)
+// node1.next = new SingleNode(3)
+// node1.next.next = new SingleNode(5)
+// node1.next.next.next = new SingleNode(7)
+// console.log(toString(node1));
+// console.log(toString(reverse(node1)))
+
+const node2 = new SingleNode(1);
+node2.next = new SingleNode(3);
+node2.next.next = new SingleNode(5);
+node2.next.next.next = new SingleNode(7);
+const p = (node2.next.next.next.next = new SingleNode(9));
+node2.next.next.next.next.next = new SingleNode(11);
+node2.next.next.next.next.next.next = new SingleNode(13);
+node2.next.next.next.next.next.next.next = new SingleNode(15);
+// node2.next.next.next.next.next.next.next.next = p;
+// console.log(hasRing(node2));
+// console.log(getCenterNode(node2));
+// removeByReverseIndex(node2, 3);
+// console.log(toString(node2));
+
+const node3 = new SingleNode(1);
+node3.next = new SingleNode(2);
+node3.next.next = new SingleNode(4);
+node3.next.next.next = new SingleNode(7);
+node3.next.next.next.next = new SingleNode(10);
+console.log(toString(mergeSortedList(node2, node3)));
